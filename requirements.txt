@@ -1,5 +1,6 @@
-Flask==2.3.3
 numpy
-Pillow
+pillow
+tensorflow==2.13.0
 tflite-runtime==2.14.0
-gunicorn
+streamlit
+protobuf==3.20.*
