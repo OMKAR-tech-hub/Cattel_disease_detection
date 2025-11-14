@@ -1,17 +1,21 @@
 from flask import Flask, render_template, request
-from tensorflow.keras.preprocessing import image
 import numpy as np
 import os
-import tensorflow as tf
+from PIL import Image
+import tflite_runtime.interpreter as tflite
 
 app = Flask(__name__)
 
-# Clear any previous TensorFlow sessions
-tf.keras.backend.clear_session()
+# ------------------------------------------------
+# ✅ Load TFLite model (instead of TensorFlow .h5)
+# ------------------------------------------------
+interpreter = tflite.Interpreter(model_path="cattle_model.tflite")
+interpreter.allocate_tensors()
 
-# ✅ Load your fixed cattle disease detection model
-model = tf.keras.models.load_model("cattle_model_fixed.h5", compile=False)
-print("✅ Model loaded successfully!")
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+print("✅ TFLite model loaded successfully!")
 
 @app.route('/')
 def home():
@@ -30,13 +34,20 @@ def predict():
     filepath = os.path.join('static', file.filename)
     file.save(filepath)
 
-    # Preprocess image
-    img = image.load_img(filepath, target_size=(224, 224))
-    img_array = image.img_to_array(img) / 255.0
+    # -----------------------------
+    # Preprocess image for TFLite
+    # -----------------------------
+    img = Image.open(filepath).resize((224, 224))
+    img_array = np.array(img, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    # Model prediction
-    prediction = model.predict(img_array)
+    # -----------------------------
+    # Run prediction
+    # -----------------------------
+    interpreter.set_tensor(input_details[0]['index'], img_array)
+    interpreter.invoke()
+    prediction = interpreter.get_tensor(output_details[0]['index'])
+
     pred_class = np.argmax(prediction, axis=1)[0]
 
     # Result mapping
