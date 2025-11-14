@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cattle Disease Detection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🐄 Cattle Disease Detection System 🌾</h1>
+    <p class="tagline">Detect Lumpy Skin Disease or Healthy Cattle using AI</p>
+
+    <form action="/predict" method="post" enctype="multipart/form-data" class="upload-form">
+      <label for="file-upload" class="upload-label">📸 Upload Cow Image</label>
+      <input type="file" name="file" id="file-upload" required>
+      <button type="submit">🔍 Predict</button>
+    </form>
+
+    {% if result %}
+    <div class="result-card">
+      <h2>{{ result }}</h2>
+      <p class="cure">{{ cure }}</p>
+      <img src="{{ image_path }}" alt="Uploaded Image" class="preview">
+    </div>
+    {% endif %}
+
+    <footer>
+      <p>Made with KrishiAI by AI_liens | Powered by TensorFlow & Flask</p>
+    </footer>
+  </div>
+</body>
+</html>
